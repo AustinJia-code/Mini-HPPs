@@ -5,3 +5,12 @@
  */
 
 #pragma once
+
+/*
+Goal: 
+auto r =
+    pipe (vec)
+    | filter ([](int x) { return x % 2; })
+    | map ([](int x) { return x * 2; })
+    | collect<std::vector> ();
+*/

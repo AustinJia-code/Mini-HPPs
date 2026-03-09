@@ -2,8 +2,6 @@
  * @file dashboard.hpp
  * @author Austin Jia
  * @brief Console telemetry implementation.
- * 
- * @warning NOT THREAD SAFE.
  */
 
 #pragma once
@@ -18,10 +16,11 @@
 namespace dashboard
 {
 
-static constexpr const char* CLEAR_LINE = "\033[2K";
-
+/**
+ * Returns a function that allows telemetry to track a variable
+ */
 template<typename T>
-std::function<std::string()> track_var (const std::string& label, const T& var)
+std::function<std::string()> telem_var (const std::string& label, const T& var)
 {
     return [&label, &var]
     {
@@ -31,13 +30,30 @@ std::function<std::string()> track_var (const std::string& label, const T& var)
     };
 }
 
+/**
+ * Returns a function that tells telemetry to print a string
+ */
+std::function<std::string()> telem_str (const std::string& data)
+{
+    return [&data]
+    {
+        return data;
+    };
+}
+
+/**
+ * Telemetry class
+ */
 class Telemetry
 {
 private:
     std::vector<std::function<std::string ()>> lines;
     int start_line;
 
-    int get_terminal_rows()
+    /**
+     * System helper for terminal dimensions
+     */
+    int get_terminal_rows ()
     {
         struct winsize w;
         ioctl (STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -45,21 +61,27 @@ private:
     }
 
 public:
+    /**
+     * Init with list of line-generating functions.
+     */
     Telemetry (std::vector<std::function<std::string ()>> lines)
         : lines (std::move (lines))
     {
-        start_line = get_terminal_rows() - lines.size() + 1;
+        start_line = get_terminal_rows () - lines.size () + 1;
 
         // restrict scroll area
         std::cout << "\033[1;" << (start_line - 1) << "r";
     }
 
-    void refresh()
+    /**
+     * Refresh telemetry output
+     */
+    void refresh ()
     {
         for (size_t i = 0; i < lines.size(); i++)
         {
             std::cout << "\033[" << (start_line + i) << ";1H";
-            std::cout << CLEAR_LINE;
+            std::cout << "\033[2K";
             std::cout << lines[i] ();
         }
 

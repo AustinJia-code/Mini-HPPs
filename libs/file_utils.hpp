@@ -3,10 +3,8 @@
  * @author Austin Jia
  * @brief Project file utility functions.
  * 
- * @todo: add safety for trailing, leading /, quotes, etc.
- *        file append
+ * @todo: file append
  *        scanner
- *        file existence check
  */
 
 #pragma once
@@ -19,20 +17,43 @@
 namespace futils
 {
 
+/**
+ * Handles files for a project with a known root directory.
+ */
 class RootedProject
 {
 private: 
     std::string root;
 
+    /**
+     * Trim leading and trailing whitespace and slashes from a string
+     */
+    std::string trim (const std::string& s) const
+    {
+        std::string out = s;
+        out.erase (out.find_last_not_of (" \n\r\t/") + 1);
+        out.erase (0, out.find_first_not_of (" \n\r\t/"));
+
+        return out;
+    }
+
 public:
-    RootedProject (const std::string& root) : root (root) {}
+    /**
+     * Root constructor
+     */
+    RootedProject (const std::string& root)
+        : root (root) {}
 
     /**
      * Get absolute path from root-relative path
+     * @warning output removes any trailing slashes for directories
      */
     std::string get_abs_from_rel (const std::string& extension) const
     {
-        return std::string {root} + extension;
+        if (extension.size () < 1)
+            return root;
+
+        return std::string {root} + "/" + trim (extension);
     }
 
     /**

@@ -1,5 +1,5 @@
 /**
- * @file timer.hpp
+ * @file time_utils.hpp
  * @author Austin Jia
  * @brief Chrono wrapper for basic types and clock utility functions.
  */
@@ -7,15 +7,15 @@
 #pragma once
 #include <chrono>
 
-namespace clock
+namespace tutils
 {
 
-using ns_t      = int64_t;
-using us_t      = int64_t;
-using ms_t      = int64_t;
-using sec_t     = double;
+using ns_t          = int64_t;
+using us_t          = int64_t;
+using ms_t          = int64_t;
+using sec_t         = double;
 
-using steady_clock = std::chrono::steady_clock;
+using steady_clock  = std::chrono::steady_clock;
 
 /*
  * ns_t to ms_t conversion

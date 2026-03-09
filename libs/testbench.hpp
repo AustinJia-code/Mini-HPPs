@@ -20,16 +20,22 @@
 namespace testbench
 {
 
-using ms_t      = int64_t;
-using steady_clock = std::chrono::steady_clock;
+namespace detail
+{
+    using ms_t = int64_t;
+    using steady_clock = std::chrono::steady_clock;
+}
+
+namespace d = detail;
+
 
 /**
  * Get current time in milliseconds
  */
-inline ms_t get_time_ms ()
+static d::ms_t get_time_ms ()
 {
-    auto now = steady_clock::now ();
-    return ms_t {std::chrono::duration_cast<std::chrono::nanoseconds>
+    auto now = d::steady_clock::now ();
+    return d::ms_t {std::chrono::duration_cast<std::chrono::nanoseconds>
                     (now.time_since_epoch ()).count () / 1000000};
 }
 
@@ -54,10 +60,10 @@ struct Test
     std::string name;
     std::function<bool ()> func;
     TestStatus status;
-    ms_t timeout = 0;  // per-test override (0 = use testbench default)
+    d::ms_t timeout = 0;  // per-test override (0 = use testbench default)
 
     Test (std::function<bool ()> func, const std::string& name,
-          ms_t timeout = 0)
+          d::ms_t timeout = 0)
         : func (func), name (name), timeout (timeout) {};
 };
 
@@ -116,7 +122,7 @@ class Testbench
 private:
     std::vector <TestFamily> families {};
     bool dependency_cycle = true;
-    ms_t default_timeout = 5000;  // default 5s per test
+    d::ms_t default_timeout = 5000;  // default 5s per test
 
     /**
      * Find family index by name, or -1
@@ -174,12 +180,12 @@ private:
         {
             test.status = TestStatus::STARTED;
 
-            ms_t limit = test.timeout > 0
+            d::ms_t limit = test.timeout > 0
                        ? test.timeout
                        : default_timeout;
 
             bool result = false;
-            ms_t start = get_time_ms ();
+            d::ms_t start = get_time_ms ();
 
             try
             {
@@ -198,7 +204,7 @@ private:
                 test.status = TestStatus::ERROR;
             }
 
-            ms_t elapsed = get_time_ms () - start;
+            d::ms_t elapsed = get_time_ms () - start;
 
             if (elapsed > limit)
             {

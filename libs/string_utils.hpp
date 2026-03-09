@@ -11,6 +11,9 @@
 namespace sutils
 {
 
+/**
+ * Trim leading and trailing whitespace from a string
+ */
 std::string trim (const std::string& s)
 {
     std::string out = s;

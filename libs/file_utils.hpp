@@ -2,6 +2,7 @@
  * @file file_utils.hpp
  * @author Austin Jia
  * @brief Project file utility functions.
+ * @namespace futils
  * 
  * @todo: file append
  *        scanner

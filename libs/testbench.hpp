@@ -2,6 +2,7 @@
  * @file testbench.hpp
  * @author Austin Jia
  * @brief Small testbench framework.
+ * @namespace test
  */
 
 #pragma once
@@ -17,7 +18,7 @@
 #include <stdexcept>
 #include <chrono>
 
-namespace testbench
+namespace test
 {
 
 namespace detail

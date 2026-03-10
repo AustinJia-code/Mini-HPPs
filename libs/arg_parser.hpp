@@ -2,6 +2,7 @@
  * @file arg_parser.hpp
  * @author Austin Jia
  * @brief Small argument handler.
+ * @namespace argp
  * 
  * Supports:
  *      - flagless boolean args, must be before any flags

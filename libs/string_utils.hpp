@@ -2,6 +2,7 @@
  * @file string_utils.hpp
  * @author Austin Jia
  * @brief String utility functions.
+ * @namespace sutils
  */
 
 #pragma once

@@ -2,6 +2,7 @@
  * @file time_utils.hpp
  * @author Austin Jia
  * @brief Chrono wrapper for basic types and clock utility functions.
+ * @namespace tutils
  */
 
 #pragma once
@@ -39,8 +40,8 @@ inline us_t sec_to_us (sec_t ts)
 inline ns_t get_time_ns ()
 {
     auto now = steady_clock::now ();
-    return ns_t {std::chrono::duration_cast<std::chrono::nanoseconds> (
-                    now.time_since_epoch ()).count ()};
+    return ns_t {std::chrono::duration_cast<std::chrono::nanoseconds>
+                    (now.time_since_epoch ()).count ()};
 }
 
 /**

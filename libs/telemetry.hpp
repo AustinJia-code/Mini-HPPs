@@ -1,7 +1,8 @@
 /**
- * @file dashboard.hpp
+ * @file telemetry.hpp
  * @author Austin Jia
  * @brief Small console telemetry solution.
+ * @namespace telem
  */
 
 #pragma once
@@ -13,7 +14,7 @@
 #include <unistd.h>
 #include <sstream>
 
-namespace dashboard
+namespace telem
 {
 
 /**

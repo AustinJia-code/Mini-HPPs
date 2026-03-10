@@ -2,6 +2,7 @@
  * @file math_utils.hpp
  * @author Austin Jia
  * @brief Math utility functions.
+ * @namespace mutils
  */
 
 #pragma once

@@ -3,6 +3,14 @@
  * @author Austin Jia
  * @brief Small console telemetry solution.
  * @namespace telem
+ * 
+ * @features
+ *      - Telemetry class for printing dynamic console output
+ *      - Helper functions for tracking variables and printing strings
+ *      - Optional output to logging stream
+ * 
+ * @details
+ *      - Sizes based on initial console sizes and will not adjust
  */
 
 #pragma once
@@ -12,6 +20,7 @@
 #include <functional>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <optional>
 #include <sstream>
 
 namespace telem
@@ -75,15 +84,24 @@ public:
     }
 
     /**
-     * Refresh telemetry output
+     * Refresh console output, outputs to an additional optional ostream for
+     * logging
      */
-    void refresh ()
+    void refresh (std::optional<std::ostream&> log_stream = std::nullopt)
     {
         for (size_t i = 0; i < lines.size(); i++)
         {
             std::cout << "\033[" << (start_line + i) << ";1H";
             std::cout << "\033[2K";
             std::cout << lines[i] ();
+
+            // Optional logging
+            if (log_stream)
+            {
+                (*log_stream) << lines[i] () << "\n";
+                if (i == lines.size () - 1)
+                    (*log_stream).flush ();
+            }
         }
 
         std::cout.flush ();

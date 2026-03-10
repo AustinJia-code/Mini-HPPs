@@ -4,18 +4,19 @@
  * @brief Small argument handler.
  * @namespace argp
  * 
- * Supports:
- *      - flagless boolean args, must be before any flags
- *      - Short flags (-f [some_val]) and long flags (--flag[=some_val])
- *      - Combined short flags (-abc == -a -b -c) 
- *      - Short flags with multiple values (-f v1 v2 == -f=v1 -f=v2)
- *          - Short flags with values must be last in the combined group
- *      - Terminal flag "--" to stop flag parsing
+ * @features
+ *      - Flagless boolean args
+ *      - Short flags (-f [opt_val]) and long flags (--flag[=opt_val])
+ *      - Short flag groups (-abc == -a -b -c) 
+ *      - Short flags with values for last in group (-abc v1 == -a -b -c v1)
+ *      - Short flags with multiple values (-f v1 v2 == -f v1 -f v2)
+ *      - Terminal flag '--' to stop flag parsing
  *      - Flags with single expected types via varied get functions
  * 
- * - Repeat flags will accumulate values into a vector
- * 
- * @todo: test
+ * @details
+ *      - Flagless args must be before any flagged args, and are treated
+ *        as a flag with boolean "true"
+ *      - Repeat flags will accumulate values into a vector
  */
 
 #pragma once

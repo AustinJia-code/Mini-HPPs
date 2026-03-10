@@ -4,8 +4,13 @@
  * @brief Project file utility functions.
  * @namespace futils
  * 
- * @todo: file append
- *        scanner
+ * @features
+ *      - RootedProject class for handling files with a known project root
+ *      - File to string and string to file functions
+ * 
+ * @todo
+ *      - file append
+ *      - file scanner
  */
 
 #pragma once

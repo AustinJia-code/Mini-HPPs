@@ -3,6 +3,9 @@
  * @author Austin Jia
  * @brief String utility functions.
  * @namespace sutils
+ * 
+ * @features
+ *      - Trim leading and trailing whitespace from a string
  */
 
 #pragma once

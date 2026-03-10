@@ -1,8 +1,12 @@
 /**
  * @file time_utils.hpp
  * @author Austin Jia
- * @brief Chrono wrapper for basic types and clock utility functions.
+ * @brief Chrono wrapper, basic types aliases, and time utility functions.
  * @namespace tutils
+ * 
+ * @features
+ *      - Type aliases for common time units (ns, us, ms, sec)
+ *      - Functions for getting current time in various units
  */
 
 #pragma once
@@ -16,7 +20,7 @@ using us_t          = int64_t;
 using ms_t          = int64_t;
 using sec_t         = double;
 
-using steady_clock  = std::chrono::steady_clock;
+using steady_clock = std::chrono::steady_clock;
 
 /*
  * ns_t to ms_t conversion
@@ -57,8 +61,8 @@ inline ms_t get_time_ms ()
  */
 inline std::chrono::time_point<steady_clock> ms_to_tp (ms_t ms)
 {
-    return std::chrono::time_point<std::chrono::steady_clock,
-           std::chrono::milliseconds> (std::chrono::milliseconds (ms));
+    return std::chrono::time_point<steady_clock, std::chrono::milliseconds>
+                (std::chrono::milliseconds (ms));
 }
 
 }

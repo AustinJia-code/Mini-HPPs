@@ -3,6 +3,9 @@
  * @author Austin Jia
  * @brief Math utility functions.
  * @namespace mutils
+ * 
+ * @features
+ *      - Radian and degree type aliases and conversion functions
  */
 
 #pragma once

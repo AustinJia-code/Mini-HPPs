@@ -3,6 +3,15 @@
  * @author Austin Jia
  * @brief Small testbench framework.
  * @namespace test
+ * 
+ * @features
+ *      - Test and TestFamily structs for defining tests and grouping them
+ *      - Testbench class for running tests with dependency handling and timeouts
+ *      - Validation of dependency graph with cycle detection
+ * 
+ * @details
+ *      - Tests are run sequentially within families, families are run in
+ *        dependency order
  */
 
 #pragma once

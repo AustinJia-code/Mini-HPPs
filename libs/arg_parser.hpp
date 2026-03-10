@@ -10,7 +10,7 @@
  *      - Short flags with multiple values (-f v1 v2 == -f=v1 -f=v2)
  *          - Short flags with values must be last in the combined group
  *      - Terminal flag "--" to stop flag parsing
- *      - All flags default to boolean false unless specified otherwise
+ *      - Flags with single expected types via varied get functions
  * 
  * - Repeat flags will accumulate values into a vector
  * 
@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <vector>
 #include <optional>
+#include <expected>
+#include <stdexcept>
 
 namespace argp
 {
@@ -30,6 +32,14 @@ namespace argp
 namespace details
 {
     using arg_map_t = std::unordered_map<std::string, std::vector<std::string>>;
+
+    enum class ErrorCode
+    {
+        WrongValueType,
+        WrongValueCount,
+        MissingValue,
+        MissingFlag
+    };
 }
 namespace d = details;
 
@@ -37,6 +47,26 @@ class arg_parser
 {
 private:
     d::arg_map_t args;
+
+    /**
+     * Helper for typed gets
+     */
+    std::expected<std::vector<std::string>, d::ErrorCode> get_expect_single (
+        const std::string& flag) const 
+    {
+        auto values = get (flag);
+
+        if (!values)
+            return std::unexpected (d::ErrorCode::MissingFlag);
+
+        if (values->empty ())
+            return std::unexpected (d::ErrorCode::MissingValue);
+
+        if (values->size () != 1)
+            return std::unexpected (d::ErrorCode::WrongValueCount);
+
+        return values;
+    }
 
 public:
     /*
@@ -106,32 +136,69 @@ public:
     }
 
     /**
-     * Get values for a flag, or empty vector if not present
+     * Get values for a flag, or MissingFlag if not present.
      */
-    std::optional<std::vector<std::string>> get (const std::string& flag) const
+    std::expected<std::vector<std::string>, d::ErrorCode> get (
+        const std::string& flag) const
     {
         auto it = args.find (flag);
         if (it != args.end ())
             return it->second;
 
-        return std::nullopt;
+        return std::unexpected (d::ErrorCode::MissingFlag);
     }
 
     /**
-     * Get true/false, determined by first value of flag if present
-     * "true" and "1" are the only accepted true values
+     * Get single value for a flag, or error if not present or multiple values
+     * If flag has no values, presence of flag is treated as boolean "true"
+     * If flag is not present, treated as boolean "false"
+     * {"true", "1", "false", "0"} are accepted boolean flags
      */  
-    bool get_bool (const std::string& flag) const
+    std::expected<bool, d::ErrorCode> get_bool (const std::string& flag) const
     {
         auto values = get (flag);
 
-        if (values)
-        {
-            const std::string& first = values->front ();
-            return first == "true" || first == "1";
-        }
+        // If flag not present, treat as false
+        if (!values)
+            return false;
 
-        return false;
+        // If flag present but no values, treat as true
+        if (values->empty ())
+            return std::unexpected (d::ErrorCode::MissingValue);
+
+        // Too many values, error
+        if (values->size () != 1)
+            return std::unexpected (d::ErrorCode::WrongValueCount);
+
+        // Parse boolean value
+        const std::string& first = values->front ();
+        if (first == "true" || first == "1")
+            return true;
+        else if (first == "false" || first == "0")
+            return false;
+        else
+            return std::unexpected (d::ErrorCode::WrongValueType);
+    }
+
+    /**
+     * Get single size_t for a flag via std::stoi, or error if not present or
+     * multiple values
+     */
+    std::expected<std::size_t, d::ErrorCode> get_size_t (const std::string& flag) const
+    {
+        auto values = get_expect_single (flag);
+        
+        if (!values)
+            return std::unexpected (values.error ());
+
+        try
+        {
+            return std::size_t {std::stoi (values->front ())};
+        }
+        catch (...)
+        {
+            return std::unexpected (d::ErrorCode::WrongValueType);
+        }
     }
 };
 

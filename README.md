@@ -1,5 +1,5 @@
 ### Mini HPPs
-A collection of small C++ header libraries for personal use:
+A collection of small C++23 header libraries for personal use:
 
 | Header                | Description                   |
 |-----------------------|-------------------------------|

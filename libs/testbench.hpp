@@ -1,7 +1,7 @@
 /**
  * @file testbench.hpp
  * @author Austin Jia
- * @brief Simple testbench framework.
+ * @brief Small testbench framework.
  */
 
 #pragma once

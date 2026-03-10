@@ -1,7 +1,7 @@
 /**
  * @file dashboard.hpp
  * @author Austin Jia
- * @brief Console telemetry implementation.
+ * @brief Small console telemetry solution.
  */
 
 #pragma once

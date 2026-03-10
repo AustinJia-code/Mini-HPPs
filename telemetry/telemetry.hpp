@@ -11,6 +11,8 @@
  * 
  * @details
  *      - Sizes based on initial console sizes and will not adjust
+ *      - Old cout is lost after the console is filled
+ *      - Turn of sticky scroll for vscode terminal
  */
 
 #pragma once
@@ -31,7 +33,7 @@ namespace telem
 template<typename T>
 std::function<std::string()> telem_var (const std::string& label, const T& var)
 {
-    return [&label, &var]
+    return [label, &var]
     {
         std::ostringstream ss;
         ss << label << ": " << var;
@@ -57,11 +59,11 @@ class Telemetry
 {
 private:
     std::vector<std::function<std::string ()>> lines;
-    int start_line;
+    int telem_rows;   // number of telemetry lines
+    int scroll_start; // first row of scroll region (1-indexed)
+    int scroll_end;   // last row of scroll region (1-indexed)
+    int total_rows;
 
-    /**
-     * System helper for terminal dimensions
-     */
     int get_terminal_rows ()
     {
         struct winsize w;
@@ -69,42 +71,68 @@ private:
         return w.ws_row;
     }
 
-public:
     /**
-     * Init with list of line-generating functions.
+     * Draw all telemetry lines at the top
      */
+    void draw_telem ()
+    {
+        for (int i = 0; i < telem_rows; i++)
+        {
+            // Save cursor, move to telem row, clear, write, restore
+            std::cout << "\033[" << (i + 1) << ";1H"
+                      << "\033[2K"
+                      << lines[i] ();
+        }
+    }
+
+public:
     Telemetry (std::vector<std::function<std::string ()>> lines)
         : lines (std::move (lines))
     {
-        int rows = get_terminal_rows ();
-        start_line = rows - this->lines.size ();
+        telem_rows   = this->lines.size ();
+        total_rows   = get_terminal_rows ();
+        scroll_start = telem_rows + 1;
+        scroll_end   = total_rows;
 
-        std::cout << "\033[1;" << (start_line - 1) << "r" << std::flush;
+        // Clear screen
+        std::cout << "\033[2J";
+
+        // Set scroll region to below telemetry
+        std::cout << "\033[" << scroll_start << ";" << scroll_end << "r";
+
+        // Draw initial telemetry
+        draw_telem ();
+
+        // Park cursor at start of scroll region
+        std::cout << "\033[" << scroll_start << ";1H" << std::flush;
+    }
+
+    ~Telemetry ()
+    {
+        // Restore full scroll region on exit
+        std::cout << "\033[1;" << total_rows << "r";
+        std::cout << "\033[" << total_rows << ";1H\n" << std::flush;
     }
 
     /**
-     * Refresh console output, outputs to an additional optional ostream for
-     * logging
+     * Refresh telemetry lines at top, keeps cursor in scroll region
      */
     void refresh (std::ostream& log_stream = std::cout)
     {
-        for (size_t i = 0; i < lines.size(); i++)
+        // Save cursor position (in scroll region)
+        std::cout << "\033[s";
+
+        draw_telem ();
+
+        // Restore cursor back into scroll region
+        std::cout << "\033[u" << std::flush;
+
+        if (log_stream.rdbuf () != std::cout.rdbuf ())
         {
-            std::cout << "\033[" << (start_line + i) << ";1H";
-            std::cout << "\033[2K";
-            std::cout << lines[i] ();
-
-            if (log_stream.rdbuf () != std::cout.rdbuf ())
-            {
+            for (int i = 0; i < telem_rows; i++)
                 log_stream << lines[i] () << "\n";
-                if (i == lines.size () - 1)
-                    log_stream.flush ();
-            }
+            log_stream.flush ();
         }
-
-        // Park cursor at bottom of scroll region so normal cout prints there
-        std::cout << "\033[" << (start_line - 1) << ";1H";
-        std::cout.flush ();
     }
 };
 

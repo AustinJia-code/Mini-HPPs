@@ -12,16 +12,17 @@ int main ()
     telem::Telemetry telem
     {{
         telem::telem_str ("===== HEADER ====="),
-        telem::telem_var ("Counter", counter)
+        telem::telem_var ("Counter", counter),
+        telem::telem_str ("===== FOOTER =====")
     }};
 
-    while (counter++ < 10)
+    while (counter++ < 100)
     {
         telem.refresh ();
 
-        std::cout << "Hello from normal cout!" << std::endl;
+        std::cout << "Hello from normal cout at count " << counter << std::endl;
         
-        usleep (500000);
+        usleep (100000);
     }
 
     return 0;

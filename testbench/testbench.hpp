@@ -69,7 +69,7 @@ struct Test
 {
     std::string name;
     std::function<bool ()> func;
-    TestStatus status;
+    TestStatus status = TestStatus::NONE;
     d::ms_t timeout = 0;  // per-test override (0 = use testbench default)
 
     Test (std::function<bool ()> func, const std::string& name,
@@ -386,14 +386,13 @@ public:
         {
             const auto& family = families[f];
 
-            if (!family.name.empty ())
-            {
-                if (f > 0)
-                    std::cout << "\n";
+            std::string name_print = family.name.empty ()
+                                        ? "Ungrouped Tests" : family.name;
+            if (f > 0)
+                std::cout << "\n";
 
-                std::cout << "--- " << family.name << " ---"
-                          << std::endl;
-            }
+            std::cout << "--- " << name_print << " ---"
+                    << std::endl;
 
             for (size_t i = 0; i < family.tests.size (); ++i)
             {

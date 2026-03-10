@@ -20,7 +20,6 @@
 #include <functional>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <optional>
 #include <sstream>
 
 namespace telem
@@ -35,7 +34,7 @@ std::function<std::string()> telem_var (const std::string& label, const T& var)
     return [&label, &var]
     {
         std::ostringstream ss;
-        ss << label << ": " << value;
+        ss << label << ": " << var;
         return ss.str ();
     };
 }
@@ -45,7 +44,7 @@ std::function<std::string()> telem_var (const std::string& label, const T& var)
  */
 std::function<std::string()> telem_str (const std::string& data)
 {
-    return [&data]
+    return [data]
     {
         return data;
     };
@@ -77,17 +76,17 @@ public:
     Telemetry (std::vector<std::function<std::string ()>> lines)
         : lines (std::move (lines))
     {
-        start_line = get_terminal_rows () - lines.size () + 1;
+        int rows = get_terminal_rows ();
+        start_line = rows - this->lines.size ();
 
-        // restrict scroll area
-        std::cout << "\033[1;" << (start_line - 1) << "r";
+        std::cout << "\033[1;" << (start_line - 1) << "r" << std::flush;
     }
 
     /**
      * Refresh console output, outputs to an additional optional ostream for
      * logging
      */
-    void refresh (std::optional<std::ostream&> log_stream = std::nullopt)
+    void refresh (std::ostream& log_stream = std::cout)
     {
         for (size_t i = 0; i < lines.size(); i++)
         {
@@ -95,15 +94,16 @@ public:
             std::cout << "\033[2K";
             std::cout << lines[i] ();
 
-            // Optional logging
-            if (log_stream)
+            if (log_stream.rdbuf () != std::cout.rdbuf ())
             {
-                (*log_stream) << lines[i] () << "\n";
+                log_stream << lines[i] () << "\n";
                 if (i == lines.size () - 1)
-                    (*log_stream).flush ();
+                    log_stream.flush ();
             }
         }
 
+        // Park cursor at bottom of scroll region so normal cout prints there
+        std::cout << "\033[" << (start_line - 1) << ";1H";
         std::cout.flush ();
     }
 };

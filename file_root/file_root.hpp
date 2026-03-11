@@ -16,6 +16,8 @@
  *      - file append
  *      - file scanner
  *      - '~' expansion
+ *      - path joining operator
+ *      - malformed path checks
  */
 
 #pragma once
@@ -82,7 +84,7 @@ public:
         if (!initialized)
             return std::unexpected (d::ExpNotInitialized);
 
-        if (extension.empty())
+        if (extension.empty ())
             return root;
 
         return root + "/" + trim(extension);
@@ -134,7 +136,6 @@ public:
 
         return {};
     }
-
 };
 
 }

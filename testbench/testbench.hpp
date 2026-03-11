@@ -162,7 +162,8 @@ private:
         for (const auto& dep : family.depends_on)
         {
             int idx = find_family (dep);
-            if (idx < 0) continue;
+            if (idx < 0)
+                continue;
 
             TestFamily& dep_family = families[idx];
             if (!dep_family.evaluated)
@@ -278,7 +279,9 @@ private:
 
             for (const auto& dep : adj[node])
             {
-                if (!known.count (dep)) continue;
+                if (!known.count (dep))
+                    continue;
+                    
                 if (state[dep] == 1)
                 {
                     // Found cycle — build the cycle string

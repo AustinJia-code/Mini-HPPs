@@ -35,13 +35,10 @@ namespace details
 {
     using arg_map_t = std::unordered_map<std::string, std::vector<std::string>>;
 
-    enum class ErrorCode
-    {
-        WrongValueType,
-        WrongValueCount,
-        MissingValue,
-        MissingFlag
-    };
+    const std::string ExpMissingFlag      = "Flag not found";
+    const std::string ExpMissingValue     = "Flag has no value";
+    const std::string ExpWrongValueCount  = "Flag has wrong number of values";
+    const std::string ExpWrongValueType   = "Flag has wrong value type";
 }
 namespace d = details;
 
@@ -53,19 +50,19 @@ private:
     /**
      * Helper for typed gets
      */
-    std::expected<std::vector<std::string>, d::ErrorCode> get_expect_single (
+    std::expected<std::vector<std::string>, std::string> get_expect_single (
         const std::string& flag) const 
     {
         auto values = get (flag);
 
         if (!values)
-            return std::unexpected (d::ErrorCode::MissingFlag);
+            return std::unexpected (d::ExpMissingFlag);
 
         if (values->empty ())
-            return std::unexpected (d::ErrorCode::MissingValue);
+            return std::unexpected (d::ExpMissingValue);
 
         if (values->size () != 1)
-            return std::unexpected (d::ErrorCode::WrongValueCount);
+            return std::unexpected (d::ExpWrongValueType);
 
         return values;
     }
@@ -140,14 +137,14 @@ public:
     /**
      * Get values for a flag, or MissingFlag if not present.
      */
-    std::expected<std::vector<std::string>, d::ErrorCode> get (
+    std::expected<std::vector<std::string>, std::string> get (
         const std::string& flag) const
     {
         auto it = args.find (flag);
         if (it != args.end ())
             return it->second;
 
-        return std::unexpected (d::ErrorCode::MissingFlag);
+        return std::unexpected (d::ExpMissingFlag);
     }
 
     /**
@@ -156,7 +153,7 @@ public:
      * If flag is not present, treated as boolean "false"
      * {"true", "1", "false", "0"} are accepted boolean flags
      */  
-    std::expected<bool, d::ErrorCode> get_bool (const std::string& flag) const
+    std::expected<bool, std::string> get_bool (const std::string& flag) const
     {
         auto values = get (flag);
 
@@ -166,11 +163,11 @@ public:
 
         // If flag present but no values, treat as true
         if (values->empty ())
-            return std::unexpected (d::ErrorCode::MissingValue);
+            return std::unexpected (d::ExpMissingValue);
 
         // Too many values, error
         if (values->size () != 1)
-            return std::unexpected (d::ErrorCode::WrongValueCount);
+            return std::unexpected (d::ExpWrongValueCount);
 
         // Parse boolean value
         const std::string& first = values->front ();
@@ -179,14 +176,14 @@ public:
         else if (first == "false" || first == "0")
             return false;
         else
-            return std::unexpected (d::ErrorCode::WrongValueType);
+            return std::unexpected (d::ExpWrongValueType);
     }
 
     /**
      * Get single size_t for a flag via std::stoi, or error if not present or
      * multiple values
      */
-    std::expected<std::size_t, d::ErrorCode> get_size_t (const std::string& flag) const
+    std::expected<std::size_t, std::string> get_size_t (const std::string& flag) const
     {
         auto values = get_expect_single (flag);
         
@@ -199,7 +196,7 @@ public:
         }
         catch (...)
         {
-            return std::unexpected (d::ErrorCode::WrongValueType);
+            return std::unexpected (d::ExpWrongValueType);
         }
     }
 };

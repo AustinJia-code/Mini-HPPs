@@ -30,11 +30,18 @@
 namespace froot
 {
 
+namespace details
+{
+    const std::string ExpNotInitialized = "FileRoot not initialized";
+}
+namespace d = details;
+
 /**
  * Handles files for a project with a known root directory.
  */
 class FileRoot
 {
+
 private: 
     std::string root;
     bool initialized = false;
@@ -73,7 +80,7 @@ public:
     get_abs_from_rel (const std::string& extension) const
     {
         if (!initialized)
-            return std::unexpected ("FileRoot not initialized");
+            return std::unexpected (d::ExpNotInitialized);
 
         if (extension.empty())
             return root;
@@ -89,7 +96,7 @@ public:
     file_to_string (const std::string& path, bool abs_path = false) const
     {
         if (!initialized)
-            return std::unexpected ("FileRoot not initialized");
+            return std::unexpected (d::ExpNotInitialized);
 
         if (path.size () < 1)
             return "";
@@ -114,7 +121,7 @@ public:
                     bool abs_path = false) const
     {
         if (!initialized)
-            return std::unexpected ("FileRoot not initialized");
+            return std::unexpected (d::ExpNotInitialized);
 
         std::string file_path = abs_path ? path : *get_abs_from_rel (path);
 

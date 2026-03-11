@@ -1,11 +1,11 @@
 /**
- * @file file_utils.hpp
+ * @file file_root.hpp
  * @author Austin Jia
  * @brief Project file utility functions.
- * @namespace futils
+ * @namespace froot
  * 
  * @features
- *      - RootedProject class for handling files with a known project root
+ *      - FileRoot class for handling files with a known project root
  *      - File to string and string to file functions
  * 
  * @todo
@@ -20,13 +20,13 @@
 #include <iostream>
 #include <iterator>
 
-namespace futils
+namespace froot
 {
 
 /**
  * Handles files for a project with a known root directory.
  */
-class RootedProject
+class FileRoot
 {
 private: 
     std::string root;
@@ -47,7 +47,7 @@ public:
     /**
      * Root constructor
      */
-    RootedProject (const std::string& root)
+    FileRoot (const std::string& root)
         : root (root) {}
 
     /**

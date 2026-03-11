@@ -1,16 +1,21 @@
 /**
- * @file file_root.hpp
+ * @file fileroot.hpp
  * @author Austin Jia
  * @brief Project file utility functions.
  * @namespace froot
  * 
  * @features
- *      - FileRoot class for handling files with a known project root
+ *      - FileRoot class for handling files with a known project root directory
  *      - File to string and string to file functions
+ * 
+ * @details
+ *      - If constructor fails, all methods will return an invalid std::expect
+ *        or do nothing.
  * 
  * @todo
  *      - file append
  *      - file scanner
+ *      - '~' expansion
  */
 
 #pragma once
@@ -19,6 +24,8 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <filesystem>
+#include <expected>
 
 namespace froot
 {
@@ -30,6 +37,7 @@ class FileRoot
 {
 private: 
     std::string root;
+    bool initialized = false;
 
     /**
      * Trim leading and trailing whitespace and slashes from a string
@@ -45,42 +53,54 @@ private:
 
 public:
     /**
-     * Root constructor
+     * Root directory constructor
      */
     FileRoot (const std::string& root)
-        : root (root) {}
+        : root (root)
+    {
+        std::ifstream dir (root);
+
+        if (std::filesystem::exists (root) &&
+            std::filesystem::is_directory (root))
+            initialized = true;
+    }
 
     /**
      * Get absolute path from root-relative path
      * @warning output removes any trailing slashes for directories
      */
-    std::string get_abs_from_rel (const std::string& extension) const
+    std::expected<std::string, std::string>
+    get_abs_from_rel (const std::string& extension) const
     {
-        if (extension.size () < 1)
+        if (!initialized)
+            return std::unexpected ("FileRoot not initialized");
+
+        if (extension.empty())
             return root;
 
-        return std::string {root} + "/" + trim (extension);
+        return root + "/" + trim(extension);
     }
 
     /**
      * Read file contents into a string
      * Returns empty string on failure
      */
-    inline std::string file_to_string (const std::string& path,
-                                       bool abs_path = false) const
+    std::expected<std::string, std::string>
+    file_to_string (const std::string& path, bool abs_path = false) const
     {
+        if (!initialized)
+            return std::unexpected ("FileRoot not initialized");
+
         if (path.size () < 1)
             return "";
 
-        std::string file_path = abs_path ? path : get_abs_from_rel (path);
+        std::string file_path = abs_path ? path : *get_abs_from_rel (path);
 
         std::ifstream file (file_path);
 
-        if (!file.is_open ())
-        {
-            std::cerr << "Error: could not open " << path << std::endl;
-            return {};
-        }
+        if (!file.is_open())
+            return std::unexpected ("Could not open file: " + file_path);
+
 
         return {std::istreambuf_iterator<char> {file},
                 std::istreambuf_iterator<char> {}};
@@ -89,20 +109,23 @@ public:
     /**
      * Overwrites file with string
      */
-    void string_to_file (const std::string& str, const std::string& path,
-                        bool abs_path = false) const
+    std::expected<void, std::string>
+    string_to_file (const std::string& str, const std::string& path,
+                    bool abs_path = false) const
     {
-        std::string file_path = abs_path ? path : get_abs_from_rel (path);
+        if (!initialized)
+            return std::unexpected ("FileRoot not initialized");
+
+        std::string file_path = abs_path ? path : *get_abs_from_rel (path);
 
         std::ofstream file (file_path);
 
         if (!file.is_open ())
-        {
-            std::cerr << "Error: could not open " << path << std::endl;
-            return;
-        }
+            return std::unexpected ("Could not open file: " + file_path);
 
         file << str;
+
+        return {};
     }
 
 };

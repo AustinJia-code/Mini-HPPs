@@ -15,7 +15,6 @@
  * @todo
  *      - file append
  *      - file scanner
- *      - '~' expansion
  *      - path joining operator
  *      - malformed path checks
  */
@@ -107,12 +106,12 @@ public:
 
         std::ifstream file (file_path);
 
-        if (!file.is_open())
+        if (!file.is_open ())
             return std::unexpected ("Could not open file: " + file_path);
 
 
-        return {std::istreambuf_iterator<char> {file},
-                std::istreambuf_iterator<char> {}};
+        return std::string {std::istreambuf_iterator<char> {file},
+                            std::istreambuf_iterator<char> {}};
     }
 
     /**

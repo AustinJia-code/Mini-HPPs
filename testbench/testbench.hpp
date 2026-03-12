@@ -32,20 +32,19 @@ namespace test
 
 namespace detail
 {
-    using ms_t = int64_t;
     using steady_clock = std::chrono::steady_clock;
 }
-
 namespace d = detail;
 
+using ms_t = int64_t;
 
 /**
  * Get current time in milliseconds
  */
-static d::ms_t get_time_ms ()
+static ms_t get_time_ms ()
 {
     auto now = d::steady_clock::now ();
-    return d::ms_t {std::chrono::duration_cast<std::chrono::nanoseconds>
+    return ms_t {std::chrono::duration_cast<std::chrono::nanoseconds>
                     (now.time_since_epoch ()).count () / 1000000};
 }
 
@@ -70,10 +69,10 @@ struct Test
     std::string name;
     std::function<bool ()> func;
     TestStatus status = TestStatus::NONE;
-    d::ms_t timeout = 0;  // per-test override (0 = use testbench default)
+    ms_t timeout = 0;  // per-test override (0 = use testbench default)
 
     Test (std::function<bool ()> func, const std::string& name,
-          d::ms_t timeout = 0)
+          ms_t timeout = 0)
         : func (func), name (name), timeout (timeout) {};
 };
 
@@ -132,7 +131,7 @@ class Testbench
 private:
     std::vector <TestFamily> families {};
     bool dependency_cycle = true;
-    d::ms_t default_timeout = 5000;  // default 5s per test
+    ms_t default_timeout = 5000;  // default 5s per test
 
     /**
      * Find family index by name, or -1
@@ -191,12 +190,12 @@ private:
         {
             test.status = TestStatus::STARTED;
 
-            d::ms_t limit = test.timeout > 0
+            ms_t limit = test.timeout > 0
                        ? test.timeout
                        : default_timeout;
 
             bool result = false;
-            d::ms_t start = get_time_ms ();
+            ms_t start = get_time_ms ();
 
             try
             {
@@ -215,7 +214,7 @@ private:
                 test.status = TestStatus::ERROR;
             }
 
-            d::ms_t elapsed = get_time_ms () - start;
+            ms_t elapsed = get_time_ms () - start;
 
             if (elapsed > limit)
             {

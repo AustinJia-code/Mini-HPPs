@@ -21,8 +21,10 @@ A collection of small C++23 header libraries for personal use:
 * Header-only libraries, no compilation or linking required
 * Designed to be easily dropped into small projects
 * Standard library only (no external dependencies)
-* No dependencies between headers
 * Each header defines a small dedicated namespace
+* Headers have no dependencies
+    * unfortunately causes many redundant aliases for common types such as
+      ```ms_t```. Working on a more elegant solution. 
 
 **Throwing Exceptions:**
 * Constructors may throw if objects cannot be created in a valid state

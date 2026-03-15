@@ -29,24 +29,27 @@
 
 namespace test
 {
-
-namespace detail
-{
-    using steady_clock = std::chrono::steady_clock;
-}
-namespace d = detail;
-
+    
 using ms_t = int64_t;
 
 /**
- * Get current time in milliseconds
+ * Internal details, not part of the public API.
  */
-static ms_t get_time_ms ()
+namespace detail
 {
-    auto now = d::steady_clock::now ();
-    return ms_t {std::chrono::duration_cast<std::chrono::nanoseconds>
-                    (now.time_since_epoch ()).count () / 1000000};
+    using steady_clock = std::chrono::steady_clock;
+
+    /**
+     * Get current time in milliseconds
+     */
+    static ms_t get_time_ms ()
+    {
+        auto now = d::steady_clock::now ();
+        return ms_t {std::chrono::duration_cast<std::chrono::nanoseconds>
+                        (now.time_since_epoch ()).count () / 1000000};
+    }
 }
+namespace d = detail;
 
 /**
  * Tests status
@@ -71,13 +74,24 @@ struct Test
     TestStatus status = TestStatus::NONE;
     ms_t timeout = 0;  // per-test override (0 = use testbench default)
 
-    Test (std::function<bool ()> func, const std::string& name,
-          ms_t timeout = 0)
+    /**
+     * Test constructor
+     * 
+     * @param func The test function, should boolean result of test
+     * @param name The name of the test, for reporting
+     * @param timeout Optional timeout in milliseconds for this test
+     *                (0 = use testbench default)
+     */
+    Test (std::function<bool ()> func, const std::string& name, ms_t timeout = 0)
         : func (func), name (name), timeout (timeout) {};
 };
 
 /**
  * Overload Test stream insertion
+ * 
+ * @param os The output stream
+ * @param obj The Test object to print
+ * @return The output stream
  */
 std::ostream& operator << (std::ostream& os, const Test& obj)
 {
@@ -129,18 +143,19 @@ struct TestFamily
 class Testbench
 {
 private:
-    std::vector <TestFamily> families {};
-    bool dependency_cycle = true;
-    ms_t default_timeout = 5000;  // default 5s per test
+    std::vector <TestFamily> families_ {};
+    bool dependency_cycle_ = true;
+    ms_t default_timeout_ = 5000;  // default 5s per test
 
     /**
      * Find family index by name, or -1
      */
     int find_family (const std::string& name) const
     {
-        for (int i = 0; i < families.size (); ++i)
-            if (families[i].name == name)
+        for (int i = 0; i < families_.size (); ++i)
+            if (families_[i].name == name)
                 return i;
+
         return -1;
     }
 
@@ -164,7 +179,7 @@ private:
             if (idx < 0)
                 continue;
 
-            TestFamily& dep_family = families[idx];
+            TestFamily& dep_family = families_[idx];
             if (!dep_family.evaluated)
                 run_family (dep_family);
 
@@ -192,10 +207,10 @@ private:
 
             ms_t limit = test.timeout > 0
                        ? test.timeout
-                       : default_timeout;
+                       : default_timeout_;
 
             bool result = false;
-            ms_t start = get_time_ms ();
+            ms_t start = d::get_time_ms ();
 
             try
             {
@@ -214,7 +229,7 @@ private:
                 test.status = TestStatus::ERROR;
             }
 
-            ms_t elapsed = get_time_ms () - start;
+            ms_t elapsed = d::get_time_ms () - start;
 
             if (elapsed > limit)
             {
@@ -244,12 +259,12 @@ private:
     bool validate_dependencies ()
     {
         std::unordered_set <std::string> known;
-        for (const auto& family : families)
+        for (const auto& family : families_)
             if (!family.name.empty ())
                 known.insert (family.name);
 
         // Check for missing dependencies
-        for (const auto& family : families)
+        for (const auto& family : families_)
             for (const auto& dep : family.depends_on)
                 if (!known.count (dep))
                     std::cerr << "\033[33mWARN --- family \""
@@ -260,7 +275,7 @@ private:
         // Check for circular dependencies via DFS
         // Build adjacency: family -> its dependencies
         std::unordered_map <std::string, std::vector <std::string>> adj;
-        for (const auto& family : families)
+        for (const auto& family : families_)
             if (!family.name.empty ())
                 adj[family.name] = family.depends_on;
 
@@ -268,7 +283,7 @@ private:
         std::unordered_map <std::string, int> state;
         std::vector <std::string> path;
 
-        this->dependency_cycle = false;
+        this->dependency_cycle_ = false;
 
         std::function <void (const std::string&)> check_cycle =
             [&] (const std::string& node)
@@ -295,7 +310,7 @@ private:
                     std::cerr << "\033[31mERROR --- circular dependency: "
                               << cycle << "\033[0m" << std::endl;
 
-                    dependency_cycle = true;
+                    dependency_cycle_ = true;
                 }
                 else if (state[dep] == 0)
                 {
@@ -311,40 +326,48 @@ private:
             if (state[name] == 0)
                 check_cycle (name);
 
-        return !dependency_cycle;
+        return !dependency_cycle_;
     }
 
 public:
     /**
      * Set default timeout in milliseconds for all tests
+     * 
+     * @param ms Timeout in milliseconds (0 = no timeout)
      */
     void set_timeout (int ms)
     {
-        default_timeout = ms;
+        default_timeout_ = ms;
     }
 
     /**
      * Add a test to the default (unnamed) family
+     * 
+     * @param test The test to add
      */
     void add_test (Test test)
     {
         int idx = find_family ("");
         if (idx < 0)
         {
-            families.push_back (TestFamily {.name = ""});
-            idx = families.size () - 1;
+            families_.push_back (TestFamily {.name = ""});
+            idx = families_.size () - 1;
         }
-        families[idx].tests.push_back (test);
+        families_[idx].tests.push_back (test);
     }
 
     /**
      * Add a named test family with optional dependencies
+     * 
+     * @param name The name of the family (for reporting and dependencies)
+     * @param tests The tests in the family
+     * @param depends_on Optional list of family names that this family depends on
      */
     void add_family (const std::string& name,
                      std::vector <Test> tests,
                      std::vector <std::string> depends_on = {})
     {
-        families.push_back (TestFamily
+        families_.push_back (TestFamily
         {
             .name       = name,
             .tests      = std::move (tests),
@@ -353,10 +376,10 @@ public:
     }
 
     /**
-     * Run all families in order, checking dependencies
-     * Return true if run success
+     * Run all families in order, checking dependencies.
+     * Intended to be called once.
      * 
-     * @note Intended to be called once.
+     * @return true if tests ran (dependency graph valid)
      */
     bool run_tests ()
     {
@@ -365,7 +388,7 @@ public:
         if (!validate_dependencies ())
             return false;
 
-        for (auto& family : families)
+        for (auto& family : families_)
             run_family (family);
         
         return true;
@@ -377,16 +400,16 @@ public:
     void print_results ()
     {
         std::cout << "\n======= RESULTS =======" << std::endl;
-        if (this->dependency_cycle)
+        if (this->dependency_cycle_)
         {    
             std::cerr << "\033[31mERROR --- Dependencies not validated"
                       << "\033[0m" << std::endl;
             return;
         }
 
-        for (size_t f = 0; f < families.size (); ++f)
+        for (size_t f = 0; f < families_.size (); ++f)
         {
-            const auto& family = families[f];
+            const auto& family = families_[f];
 
             std::string name_print = family.name.empty ()
                                         ? "Ungrouped Tests" : family.name;
@@ -403,7 +426,7 @@ public:
                     std::cout << std::endl;
             }
 
-            if (f < families.size () - 1)
+            if (f < families_.size () - 1)
                 std::cout << std::endl;
         }
         

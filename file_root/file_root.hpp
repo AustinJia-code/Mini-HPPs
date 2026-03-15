@@ -61,7 +61,11 @@ private:
 
 public:
     /**
-     * Root directory constructor
+     * Root directory constructor. Path unwarapped via ifstream, check docs
+     * for compatibility. If path is invalid, all methods will return an invalid
+     * std::expected.
+     * 
+     * @param root The root directory for the project.
      */
     FileRoot (const std::string& root)
         : root (root)
@@ -74,8 +78,11 @@ public:
     }
 
     /**
-     * Get absolute path from root-relative path
-     * @warning output removes any trailing slashes for directories
+     * Get absolute path from root-relative path. Output removes any trailing
+     * slashes, even for directories.
+     * 
+     * @param extension The root-relative path to convert to absolute.
+     * @return Absolute path or error string if not initialized / bad extension
      */
     std::expected<std::string, std::string>
     get_abs_from_rel (const std::string& extension) const
@@ -91,7 +98,10 @@ public:
 
     /**
      * Read file contents into a string
-     * Returns empty string on failure
+     * 
+     * @param path The root-relative or absolute path to the file to read
+     * @param abs_path If true, treat path as absolute.
+     * @return File contents as string, or error string if not initialized / file issue
      */
     std::expected<std::string, std::string>
     file_to_string (const std::string& path, bool abs_path = false) const
@@ -116,6 +126,11 @@ public:
 
     /**
      * Overwrites file with string
+     * 
+     * @param str The string to write to the file
+     * @param path The root-relative or absolute path to the file to write
+     * @param abs_path If true, treat path as absolute.
+     * @return Void or error string if not initialized / file issue
      */
     std::expected<void, std::string>
     string_to_file (const std::string& str, const std::string& path,

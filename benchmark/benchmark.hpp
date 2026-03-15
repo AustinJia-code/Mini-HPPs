@@ -28,6 +28,9 @@ namespace bench
 
 using ms_t = int64_t;
 
+/**
+ * Internal details, not part of the public API.
+ */
 namespace detail
 {
     using ns_t = int64_t;
@@ -52,12 +55,18 @@ namespace detail
 }
 namespace d = detail;
 
+/**
+ * Benchmark Hyperparameters
+ */
 struct Params
 {
     size_t warmup_iterations;
     size_t iterations;
 };
 
+/**
+ * Benchmark Results
+ */
 struct Results
 {
     ms_t average_time;
@@ -65,6 +74,15 @@ struct Results
     ms_t max_time;
 };
 
+/**
+ * Get benchmark results for a function with optional setup and teardown.
+ * 
+ * @param params Benchmark parameters
+ * @param func The function to benchmark
+ * @param setup Optional setup function to run before each iteration
+ * @param teardown Optional teardown function to run after each iteration
+ * @return Benchmark results
+ */
 Results benchmark (const Params& params,
                    const std::function<void()>& func,
                    const std::function<void()>& setup = [](){},

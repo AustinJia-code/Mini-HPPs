@@ -31,6 +31,9 @@
 namespace argp
 {
 
+/**
+ * Internal details, not part of the public API.
+ */
 namespace details
 {
     using arg_map_t = std::unordered_map<std::string, std::vector<std::string>>;
@@ -42,16 +45,17 @@ namespace details
 }
 namespace d = details;
 
+
 class arg_parser
 {
 private:
-    d::arg_map_t args;
+    d::arg_map_t args_;
 
     /**
-     * Helper for typed gets
+     * Internal helper for typed gets
      */
-    std::expected<std::vector<std::string>, std::string> get_expect_single (
-        const std::string& flag) const 
+    std::expected<std::vector<std::string>, std::string>
+    get_expect_single (const std::string& flag) const 
     {
         auto values = get (flag);
 
@@ -71,6 +75,10 @@ public:
     /*
      * Construct arg_parser from command line arguments
      * Expects arguments in the form --flag=value or --flag
+     * 
+     * @param argc Argument count from main
+     * @param argv Argument vector from main
+     * @param defaults Optional map of default values for flags not found
      */
     arg_parser (int argc, char* argv[], d::arg_map_t defaults = {})
     {
@@ -78,7 +86,7 @@ public:
         int i = 1;
         while (i < argc && argv[i][0] != '-')
         {
-            args[argv[i]].push_back ("true");
+            args_[argv[i]].push_back ("true");
             ++i;
         }
 
@@ -98,13 +106,13 @@ public:
                 {
                     std::string flag = arg.substr (2, eq_pos - 2);
                     std::string value = arg.substr (eq_pos + 1);
-                    args[flag].push_back (value);
+                    args_[flag].push_back (value);
                 }
                 // No value, treat as boolean
                 else
                 {
                     std::string flag = arg.substr (2);
-                    args[flag].push_back ("true");
+                    args_[flag].push_back ("true");
                 }
             }
             // Short flag
@@ -114,34 +122,37 @@ public:
                 for (size_t j = 1; j < arg.size() - 1; ++j)
                 {
                     std::string flag (1, arg[j]);
-                    args[flag].push_back ("true");
+                    args_[flag].push_back ("true");
                 }
 
                 // Check last flag for args
                 std::string flag (1, arg.back ());
                 while (i + 1 < argc && argv[i + 1][0] != '-')
-                    args[flag].push_back (argv[++i]);
+                    args_[flag].push_back (argv[++i]);
                
                 // If no args, treat as boolean
-                if (args[flag].empty ())
-                    args[flag].push_back ("true");
+                if (args_[flag].empty ())
+                    args_[flag].push_back ("true");
             }
         }
 
         // Set defaults if not in args
         for (const auto& [flag, value] : defaults)
-            if (args.find (flag) == args.end ())
-                args[flag] = value;
+            if (args_.find (flag) == args_.end ())
+                args_[flag] = value;
     }
 
     /**
      * Get values for a flag, or MissingFlag if not present.
+     * 
+     * @param flag The flag to get values for
+     * @return Vector of values for the flag, or error string if not found
      */
-    std::expected<std::vector<std::string>, std::string> get (
-        const std::string& flag) const
+    std::expected<std::vector<std::string>, std::string> get
+        (const std::string& flag) const
     {
-        auto it = args.find (flag);
-        if (it != args.end ())
+        auto it = args_.find (flag);
+        if (it != args_.end ())
             return it->second;
 
         return std::unexpected (d::ExpMissingFlag);
@@ -152,6 +163,9 @@ public:
      * If flag has no values, presence of flag is treated as boolean "true"
      * If flag is not present, treated as boolean "false"
      * {"true", "1", "false", "0"} are accepted boolean flags
+     * 
+     * @param flag The flag to get the boolean value for
+     * @return Boolean value of the flag, or error string if issue
      */  
     std::expected<bool, std::string> get_bool (const std::string& flag) const
     {
@@ -180,10 +194,13 @@ public:
     }
 
     /**
-     * Get single size_t for a flag via std::stoi, or error if not present or
-     * multiple values
+     * Get single size_t for a flag via std::stoi
+     * 
+     * @param flag The flag to get the boolean value for
+     * @return size_t value of the flag, or error string if issue
      */
-    std::expected<std::size_t, std::string> get_size_t (const std::string& flag) const
+    std::expected<std::size_t, std::string> get_size_t (const std::string& flag)
+        const
     {
         auto values = get_expect_single (flag);
         

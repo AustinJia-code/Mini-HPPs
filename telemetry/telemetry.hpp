@@ -28,7 +28,7 @@ namespace telem
 {
 
 /**
- * Returns a function that allows telemetry to track a variable
+ * @return an std::function that allows telemetry to track a variable
  */
 template<typename T>
 std::function<std::string()> telem_var (const std::string& label, const T& var)
@@ -42,7 +42,7 @@ std::function<std::string()> telem_var (const std::string& label, const T& var)
 }
 
 /**
- * Returns a function that tells telemetry to print a string
+ * @return an std::function that allows telemetry to print a static string
  */
 std::function<std::string()> telem_str (const std::string& data)
 {
@@ -58,13 +58,16 @@ std::function<std::string()> telem_str (const std::string& data)
 class Telemetry
 {
 private:
-    std::vector<std::function<std::string ()>> lines;
-    int telem_rows;   // number of telemetry lines
-    int scroll_start; // first row of scroll region (1-indexed)
-    int scroll_end;   // last row of scroll region (1-indexed)
-    int total_rows;
+    std::vector<std::function<std::string ()>> lines_;
+    int telem_rows_;         // number of telemetry lines
+    int scroll_start_;       // first row of scroll region (1-indexed)
+    int scroll_end_;         // last row of scroll region (1-indexed)
+    int total_rows_;
 
-    int get_terminal_rows ()
+    /**
+     * Get number of temrinal rows
+     */
+    int get_terminal_rows_ ()
     {
         struct winsize w;
         ioctl (STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -76,46 +79,57 @@ private:
      */
     void draw_telem ()
     {
-        for (int i = 0; i < telem_rows; i++)
+        for (int i = 0; i < telem_rows_; i++)
         {
             // Save cursor, move to telem row, clear, write, restore
             std::cout << "\033[" << (i + 1) << ";1H"
                       << "\033[2K"
-                      << lines[i] ();
+                      << lines_[i] ();
         }
     }
 
 public:
+    /**
+     * Function list constructor
+     * 
+     * @param lines Vector of functions that return strings to print
+     * 
+     */
     Telemetry (std::vector<std::function<std::string ()>> lines)
-        : lines (std::move (lines))
+        : lines_ (std::move (lines))
     {
-        telem_rows   = this->lines.size ();
-        total_rows   = get_terminal_rows ();
-        scroll_start = telem_rows + 1;
-        scroll_end   = total_rows;
+        telem_rows_   = this->lines_.size ();
+        total_rows_   = get_terminal_rows_ ();
+        scroll_start_ = telem_rows_ + 1;
+        scroll_end_   = total_rows_;
 
         // Clear screen
         std::cout << "\033[2J";
 
         // Set scroll region to below telemetry
-        std::cout << "\033[" << scroll_start << ";" << scroll_end << "r";
+        std::cout << "\033[" << scroll_start_ << ";" << scroll_end_ << "r";
 
         // Draw initial telemetry
         draw_telem ();
 
         // Park cursor at start of scroll region
-        std::cout << "\033[" << scroll_start << ";1H" << std::flush;
+        std::cout << "\033[" << scroll_start_ << ";1H" << std::flush;
     }
 
+    /**
+     * Destructor restores full scroll region and moves cursor to bottom
+     */
     ~Telemetry ()
     {
         // Restore full scroll region on exit
-        std::cout << "\033[1;" << total_rows << "r";
-        std::cout << "\033[" << total_rows << ";1H\n" << std::flush;
+        std::cout << "\033[1;" << total_rows_ << "r";
+        std::cout << "\033[" << total_rows_ << ";1H\n" << std::flush;
     }
 
     /**
      * Refresh telemetry lines at top, keeps cursor in scroll region
+     * 
+     * @param log_stream Optional stream to also output telemetry lines to
      */
     void refresh (std::ostream& log_stream = std::cout)
     {
@@ -129,8 +143,8 @@ public:
 
         if (log_stream.rdbuf () != std::cout.rdbuf ())
         {
-            for (int i = 0; i < telem_rows; i++)
-                log_stream << lines[i] () << "\n";
+            for (int i = 0; i < telem_rows_; i++)
+                log_stream << lines_[i] () << "\n";
             log_stream.flush ();
         }
     }

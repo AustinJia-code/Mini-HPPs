@@ -1,52 +1,94 @@
 /**
  * @file geo_utils.hpp
  * @author Austin Jia
- * @brief Geometry utility functions.
+ * @brief Basic geometric utilities and types.
  * @namespace gutils
- * 
- * @features
- *      - Radian and degree type aliases and conversion functions
- *      - Distance type aliases
  */
 
 #pragma once
 
 #include <cmath>
+#include <algorithm>
 
 namespace gutils
 {
 
-using deg_t     = double;
-using rad_t     = double;
-using dist_t    = double;   // contextual distance type, can be mm, cm, m, etc
+using dist_t = double;   // contextual distance type, can be mm, cm, m, etc
 
 struct vec3_t
 {
     dist_t x, y, z;
 
     /**
-     * Get the magnitude of the vector
+     * Add another vector to this vector
      */
-    dist_t mag () const
+    vec3_t operator+ (const vec3_t& other) const
     {
-        return std::sqrt (x * x + y * y + z * z);
+        return {x + other.x, y + other.y, z + other.z};
+    }
+
+    /**
+     * Subtract another vector from this vector
+     */
+    vec3_t operator- (const vec3_t& other) const
+    {
+        return {x - other.x, y - other.y, z - other.z};
     }
 };
 
 /**
- * Convert radians to degrees
+ * Get the magnitude of a vector
  */
-inline deg_t rad_to_deg (rad_t rad)
+dist_t mag (const vec3_t& v)
 {
-    return rad * 180.0 / M_PI;
+    return std::sqrt (v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
 /**
- * Convert degrees to radians
+ * Get the norm of a vector
  */
-inline rad_t deg_to_rad (deg_t deg)
+vec3_t norm (const vec3_t& v)
 {
-    return deg * M_PI / 180.0;
+    dist_t m = mag (v);
+    return {v.x / m, v.y / m, v.z / m};
 }
+
+/**
+ * Get the dot product of two vectors
+ */
+dist_t dot (const vec3_t& a, const vec3_t& b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+/**
+ * Get the cross product with another vector
+ */
+vec3_t cross (const vec3_t& a, const vec3_t& b)
+{
+    return {a.y * b.z - a.z * b.y,
+            a.z * b.x - a.x * b.z,
+            a.x * b.y - a.y * b.x};
+}
+
+/**
+ * Get the minimum of two vectors
+ */
+vec3_t min (const vec3_t& a, const vec3_t& b)
+{
+    return {std::min (a.x, b.x),
+            std::min (a.y, b.y),
+            std::min (a.z, b.z)};
+}  
+
+/**
+ * Get the max of two vectors
+ */
+vec3_t max (const vec3_t& a, const vec3_t& b)
+{
+    return {std::max (a.x, b.x),
+            std::max (a.y, b.y),
+            std::max (a.z, b.z)};
+}  
 
 }

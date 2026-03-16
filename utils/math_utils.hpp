@@ -1,11 +1,12 @@
 /**
  * @file math_utils.hpp
  * @author Austin Jia
- * @brief Math utility functions.
+ * @brief Math/geometry utility functions.
  * @namespace mutils
  * 
  * @features
  *      - Radian and degree type aliases and conversion functions
+ *      - Distance type aliases
  */
 
 #pragma once
@@ -17,6 +18,7 @@ namespace mutils
 
 using deg_t = double;
 using rad_t = double;
+using mm_t  = double;
 
 /**
  * Convert radians to degrees

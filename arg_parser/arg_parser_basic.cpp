@@ -3,7 +3,7 @@
  * @author Austin Jia
  * @brief Basic usage of arg_parser.
  * 
- * @example ./arg_parser_basic --name=Austin -c 5 --verbose --item=a --item=b
+ * @example ./arg_parser_basic im_flagless --name=Austin -c 5 --verbose --item=a --item=b
  */
 
 #include "arg_parser.hpp"
@@ -17,6 +17,18 @@ int main (int argc, char* argv[])
         {"name", {"Evil Austin"}},
         {"count", {"1"}}
     });
+
+    // Get flagless args (e.g., im_flagless)
+    auto flagless_res = parser.get ("argless_");
+    if (flagless_res)
+    {
+        std::cout << "Flagless args:";
+        for (const auto& arg : *flagless_res)
+        {
+            std::cout << " " << arg;
+        }
+        std::cout << std::endl;
+    }
 
     // Get a boolean flag (e.g., --verbose or -v)
     auto verbose = parser.get_bool ("verbose");

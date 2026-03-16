@@ -36,8 +36,6 @@ namespace argp
  */
 namespace details
 {
-    using arg_map_t = std::unordered_map<std::string, std::vector<std::string>>;
-
     const std::string ExpMissingFlag      = "Flag not found";
     const std::string ExpMissingValue     = "Flag has no value";
     const std::string ExpWrongValueCount  = "Flag has wrong number of values";
@@ -45,11 +43,12 @@ namespace details
 }
 namespace d = details;
 
+using argmap_t = std::unordered_map<std::string, std::vector<std::string>>;
 
 class arg_parser
 {
 private:
-    d::arg_map_t args_;
+    argmap_t args_;
 
     /**
      * Internal helper for typed gets
@@ -80,7 +79,7 @@ public:
      * @param argv Argument vector from main
      * @param defaults Optional map of default values for flags not found
      */
-    arg_parser (int argc, char* argv[], d::arg_map_t defaults = {})
+    arg_parser (int argc, char* argv[], argmap_t defaults = {})
     {
         // First parse flagless boolean args until we hit a flag
         int i = 1;
@@ -209,7 +208,7 @@ public:
 
         try
         {
-            return std::size_t {std::stoi (values->front ())};
+            return std::size_t {std::stoull (values->front ())};
         }
         catch (...)
         {

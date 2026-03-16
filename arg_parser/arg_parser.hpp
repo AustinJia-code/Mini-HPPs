@@ -14,8 +14,8 @@
  *      - Flags with single expected types via varied get functions
  * 
  * @details
- *      - Flagless args must be before any flagged args, and are treated
- *        as a flag with boolean "true"
+ *      - Flagless args must be before any flagged args, and are returned as
+ *        a vector under the flag 'argless_'
  *      - Repeat flags will accumulate values into a vector
  */
 
@@ -86,7 +86,7 @@ public:
         int i = 1;
         while (i < argc && argv[i][0] != '-')
         {
-            args_[argv[i]].push_back ("true");
+            args_["argless_"].push_back (argv[i]);
             ++i;
         }
 

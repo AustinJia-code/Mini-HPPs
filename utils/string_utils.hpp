@@ -2,7 +2,7 @@
  * @file string_utils.hpp
  * @author Austin Jia
  * @brief String utility functions.
- * @namespace su
+ * @namespace sutils
  * 
  * @features
  *      - Trim leading and trailing whitespace from a string

@@ -2,7 +2,7 @@
  * @file time_utils.hpp
  * @author Austin Jia
  * @brief Chrono wrapper, basic types aliases, and time utility functions.
- * @namespace tu
+ * @namespace tutils
  * 
  * @features
  *      - Type aliases for common time units (ns, us, ms, sec)

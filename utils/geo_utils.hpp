@@ -2,7 +2,7 @@
  * @file geo_utils.hpp
  * @author Austin Jia
  * @brief Geometry utility functions.
- * @namespace gu
+ * @namespace gutils
  * 
  * @features
  *      - Radian and degree type aliases and conversion functions

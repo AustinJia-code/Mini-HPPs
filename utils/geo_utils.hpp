@@ -14,10 +14,26 @@ namespace gutils
 {
 
 using dist_t = double;   // contextual distance type, can be mm, cm, m, etc
+using deg_t  = double;
 
 struct vec3_t
 {
     dist_t x, y, z;
+
+    /**
+     * Default constructor
+     */
+    vec3_t () : x (0), y (0), z (0) {}
+
+    /**
+     * Constructor with explicit values
+     */
+    vec3_t (dist_t x_, dist_t y_, dist_t z_) : x (x_), y (y_), z (z_) {}
+
+    /**
+     * Single value constructor
+     */
+    vec3_t (dist_t v) : x (v), y (v), z (v) {}
 
     /**
      * Add another vector to this vector
@@ -33,6 +49,22 @@ struct vec3_t
     vec3_t operator- (const vec3_t& other) const
     {
         return {x - other.x, y - other.y, z - other.z};
+    }
+
+    /**
+     * Scalar multiplication
+     */
+    vec3_t operator* (dist_t scalar) const
+    {
+        return {x * scalar, y * scalar, z * scalar};
+    }
+
+    /**
+     * Scalar division
+     */
+    vec3_t operator/ (dist_t scalar) const
+    {
+        return {x / scalar, y / scalar, z / scalar};
     }
 };
 
@@ -90,5 +122,27 @@ vec3_t max (const vec3_t& a, const vec3_t& b)
             std::max (a.y, b.y),
             std::max (a.z, b.z)};
 }  
+
+/**
+ * Get the absolute value of a vector
+ */
+vec3_t abs (const vec3_t& v)
+{
+    return {std::abs (v.x), std::abs (v.y), std::abs (v.z)};
+}
+
+/**
+ * Rotate a vector by axis-angle
+ */
+vec3_t rotate (const vec3_t& v, const vec3_t& axis, deg_t angle)
+{
+    vec3_t axis_norm = norm (axis);
+    double cos_a = std::cos (angle * M_PI / 180.0);
+    double sin_a = std::sin (angle * M_PI / 180.0);
+
+    return v * cos_a
+         + cross (axis_norm, v) * sin_a
+         + axis_norm * dot (axis, v) * (1 - cos_a);
+}
 
 }

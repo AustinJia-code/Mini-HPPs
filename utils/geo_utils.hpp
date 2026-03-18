@@ -36,6 +36,18 @@ struct vec3_t
     vec3_t (dist_t v) : x (v), y (v), z (v) {}
 
     /**
+     * Add another vector to this vector in place
+     */
+    vec3_t& operator+= (const vec3_t& other)
+    {
+        this->x += other.x;
+        this->y += other.y;
+        this->z += other.z;
+
+        return *this;
+    }
+
+    /**
      * Add another vector to this vector
      */
     vec3_t operator+ (const vec3_t& other) const
@@ -65,6 +77,14 @@ struct vec3_t
     vec3_t operator/ (dist_t scalar) const
     {
         return {x / scalar, y / scalar, z / scalar};
+    }
+
+    /**
+     * Equality operator
+     */
+    bool operator== (const vec3_t& other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
     }
 };
 

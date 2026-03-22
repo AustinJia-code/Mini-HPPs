@@ -74,6 +74,15 @@ struct Results
     ms_t max_time;
 };
 
+std::ostream& operator<< (std::ostream& os, const Results& obj)
+{
+    os << "Average Time: " << obj.average_time << " ms\n"
+       << "Min Time: " << obj.min_time << " ms\n"
+       << "Max Time: " << obj.max_time << " ms\n";
+       
+    return os;
+}
+
 /**
  * Get benchmark results for a function with optional setup and teardown.
  * 

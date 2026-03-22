@@ -86,6 +86,20 @@ struct vec3_t
     {
         return x == other.x && y == other.y && z == other.z;
     }
+
+    /**
+     * Comparison operator for canonical ordering
+     */
+    bool operator> (const vec3_t& other) const
+    {
+        if (x != other.x)
+            return x > other.x;
+            
+        if (y != other.y)
+            return y > other.y;
+
+        return z > other.z;
+    }
 };
 
 /**
@@ -163,6 +177,16 @@ vec3_t rotate (const vec3_t& v, const vec3_t& axis, deg_t angle)
     return v * cos_a
          + cross (axis_norm, v) * sin_a
          + axis_norm * dot (axis, v) * (1 - cos_a);
+}
+
+/**
+ * Approximate equality
+ */
+bool approx (const vec3_t& a, const vec3_t& b, double eps = 1e-5)
+{
+    return std::abs (a.x - b.x) < eps
+        && std::abs (a.y - b.y) < eps
+        && std::abs (a.z - b.z) < eps;
 }
 
 }

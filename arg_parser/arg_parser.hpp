@@ -176,7 +176,7 @@ public:
 
         // If flag present but no values, treat as true
         if (values->empty ())
-            return std::unexpected (d::ExpMissingValue);
+            return true;
 
         // Too many values, error
         if (values->size () != 1)

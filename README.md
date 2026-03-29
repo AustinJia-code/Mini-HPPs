@@ -1,16 +1,18 @@
 ### Mini HPPs
 A collection of small **C++23** header libraries for personal use:
 
-| Header                | Description          | Namespace    |
-|-----------------------|----------------------|--------------|
-| `arg_parser.hpp`      | argument handler     | ```argp```   |
-| `benchmark.hpp`       | function benchmarker | ```bench```  |
-| `file_root.hpp`       | project file helpers | ```froot```  |
-| `dashboard.hpp`       | console telemetry    | ```dash```   |
-| `testbench.hpp`       | unit test framework  | ```test```   |
-| `math_utils.hpp`      | math helpers         | ```mutils``` |
-| `string_utils.hpp`    | string helpers       | ```sutils``` |
-| `time_utils.hpp`      | time helpers         | ```tutils``` |
+| Header                | Description           | Namespace    |
+|-----------------------|-----------------------|--------------|
+| `arg_parser.hpp`      | argument handler      | ```argp```   |
+| `benchmark.hpp`       | function benchmarker  | ```bench```  |
+| `file_root.hpp`       | project file helpers  | ```froot```  |
+| `dashboard.hpp`       | console telemetry     | ```dash```   |
+| `testbench.hpp`       | unit test framework   | ```test```   |
+| `profiler.hpp`        | manual stack profiler | ```prof```   |
+| `math_utils.hpp`      | math helpers          | ```mutils``` |
+| `geo_utils.hpp`       | geometry helpers      | ```gutils``` |
+| `string_utils.hpp`    | string helpers        | ```sutils``` |
+| `time_utils.hpp`      | time helpers          | ```tutils``` |
 
 ### Design
 **Intention:**

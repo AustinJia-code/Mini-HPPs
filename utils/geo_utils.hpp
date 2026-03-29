@@ -16,6 +16,8 @@ namespace gutils
 using dist_t = double;   // contextual distance type, can be mm, cm, m, etc
 using deg_t  = double;
 
+double EPS = 1e-5;
+
 struct vec3_t
 {
     dist_t x, y, z;
@@ -182,11 +184,19 @@ vec3_t rotate (const vec3_t& v, const vec3_t& axis, deg_t angle)
 /**
  * Approximate equality
  */
-bool approx (const vec3_t& a, const vec3_t& b, double eps = 1e-5)
+bool approx (const vec3_t& a, const vec3_t& b, double eps = EPS)
 {
     return std::abs (a.x - b.x) < eps
         && std::abs (a.y - b.y) < eps
         && std::abs (a.z - b.z) < eps;
+}
+
+/**
+ * Approximate equality for scalars
+ */
+bool approx (dist_t a, dist_t b, double eps = EPS)
+{
+    return std::abs (a - b) < eps;
 }
 
 }

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Flame Graph</title>
+<style>
+  body { margin:0; background:#1e1e2e; color:#cdd6f4; font-family:monospace }
+  #tip { position:fixed; background:#313244; color:#cdd6f4; padding:5px 10px; border-radius:4px; font-size:13px; pointer-events:none; display:none; white-space:nowrap }
+</style>
+</head>
+<body>
+<div id="tip"></div>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200.000000" height="78.000000" style="font-family:monospace;display:block">
+<g><rect x="0.000000" y="0.000000" width="1199.000000" height="24.000000" fill="#e06c75" rx="2" data-label="render (6ms)"><title>render (6ms)</title></rect><clipPath id="c0"><rect x="0.000000" y="0.000000" width="1199.000000" height="26.000000"/></clipPath><text x="4.000000" y="16.900000" font-size="12" fill="#fff" clip-path="url(#c0)">render</text></g>
+<g><rect x="1.995585" y="26.000000" width="29.232431" height="24.000000" fill="#e5c07b" rx="2" data-label="frustum_cull (153us)"><title>frustum_cull (153us)</title></rect><clipPath id="c1"><rect x="1.995585" y="26.000000" width="29.232431" height="26.000000"/></clipPath><text x="5.995585" y="42.900000" font-size="12" fill="#fff" clip-path="url(#c1)">frustum_cull</text></g>
+<g><rect x="32.316112" y="26.000000" width="354.829814" height="24.000000" fill="#e5c07b" rx="2" data-label="shadow_pass (1ms)"><title>shadow_pass (1ms)</title></rect><clipPath id="c2"><rect x="32.316112" y="26.000000" width="354.829814" height="26.000000"/></clipPath><text x="36.316112" y="42.900000" font-size="12" fill="#fff" clip-path="url(#c2)">shadow_pass</text></g>
+<g><rect x="388.298217" y="26.000000" width="473.343821" height="24.000000" fill="#e5c07b" rx="2" data-label="geometry_pass (2ms)"><title>geometry_pass (2ms)</title></rect><clipPath id="c3"><rect x="388.298217" y="26.000000" width="473.343821" height="26.000000"/></clipPath><text x="392.298217" y="42.900000" font-size="12" fill="#fff" clip-path="url(#c3)">geometry_pass</text></g>
+<g><rect x="862.783861" y="26.000000" width="177.185614" height="24.000000" fill="#e5c07b" rx="2" data-label="lighting_pass (902us)"><title>lighting_pass (902us)</title></rect><clipPath id="c4"><rect x="862.783861" y="26.000000" width="177.185614" height="26.000000"/></clipPath><text x="866.783861" y="42.900000" font-size="12" fill="#fff" clip-path="url(#c4)">lighting_pass</text></g>
+<g><rect x="1041.099050" y="26.000000" width="157.879222" height="24.000000" fill="#e5c07b" rx="2" data-label="post_process (804us)"><title>post_process (804us)</title></rect><clipPath id="c5"><rect x="1041.099050" y="26.000000" width="157.879222" height="26.000000"/></clipPath><text x="1045.099050" y="42.900000" font-size="12" fill="#fff" clip-path="url(#c5)">post_process</text></g>
+<g><rect x="1041.361559" y="52.000000" width="117.725555" height="24.000000" fill="#61afef" rx="2" data-label="bloom (601us)"><title>bloom (601us)</title></rect><clipPath id="c6"><rect x="1041.361559" y="52.000000" width="117.725555" height="26.000000"/></clipPath><text x="1045.361559" y="68.900000" font-size="12" fill="#fff" clip-path="url(#c6)">bloom</text></g>
+<g><rect x="1160.191407" y="52.000000" width="38.764940" height="24.000000" fill="#61afef" rx="2" data-label="tonemap (201us)"><title>tonemap (201us)</title></rect><clipPath id="c7"><rect x="1160.191407" y="52.000000" width="38.764940" height="26.000000"/></clipPath><text x="1164.191407" y="68.900000" font-size="12" fill="#fff" clip-path="url(#c7)">tonemap</text></g>
+</svg>
+<script>
+const tip = document.getElementById('tip');
+document.querySelectorAll('rect[data-label]').forEach(r => {
+  r.addEventListener('mousemove', e => {
+    tip.textContent = r.dataset.label;
+    tip.style.display = 'block';
+    tip.style.left = (e.clientX + 14) + 'px';
+    tip.style.top  = (e.clientY + 14) + 'px';
+  });
+  r.addEventListener('mouseleave', () => tip.style.display = 'none');
+});
+</script>
+</body>
+</html>
